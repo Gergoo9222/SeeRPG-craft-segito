@@ -1,1003 +1,679 @@
 <!DOCTYPE html>
-<html lang="hu" class="dark">
+<html lang="hu">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SeeRPG Tools - Fegyver Craft Kalkulátor</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'Segoe UI', 'sans-serif'],
-                    },
-                    colors: {
-                        see: {
-                            bg: '#111215',
-                            panel: '#1b1d23',
-                            card: '#242730',
-                            cardHover: '#2b2f3a',
-                            border: '#323642',
-                            yellow: '#f7ca44',
-                            yellowHover: '#eab308',
-                            yellowDim: 'rgba(247, 202, 68, 0.14)',
-                            blueDim: 'rgba(56, 189, 248, 0.14)',
-                            blueText: '#38bdf8',
-                            text: '#f3f4f6',
-                            muted: '#9ca3af'
-                        }
-                    }
-                }
+    <title>SeeRPG Craft Kalkulátor & Számláló</title>
+    <style>
+        :root {
+            --bg-main: #111318;
+            --bg-card: #181a20;
+            --bg-card-hover: #1f222b;
+            --bg-input: #111318;
+            --accent: #f7ca44;
+            --accent-hover: #f8d35f;
+            --text-main: #ffffff;
+            --text-muted: #9ca3af;
+            --border: #262933;
+            --danger: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--bg-card);
+            border-bottom: 2px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-badge {
+            background-color: var(--accent);
+            color: #000;
+            font-weight: 800;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(247, 202, 68, 0.2);
+        }
+
+        h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 290px 1fr;
+            gap: 24px;
+            max-width: 1400px;
+            margin: 24px auto;
+            padding: 0 20px;
+            width: 100%;
+            flex: 1;
+        }
+
+        @media (max-width: 950px) {
+            .main-container {
+                grid-template-columns: 1fr;
             }
         }
-    </script>
-    <style>
-        body {
-            background-color: #111215;
-            background-image: 
-                radial-gradient(circle at 15% 15%, rgba(247, 202, 68, 0.04) 0%, transparent 45%),
-                radial-gradient(circle at 85% 85%, rgba(247, 202, 68, 0.03) 0%, transparent 45%),
-                linear-gradient(to bottom, rgba(17, 18, 21, 0.94), rgba(17, 18, 21, 0.98));
-            color: #f3f4f6;
-            min-height: 100vh;
+
+        .sidebar {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            height: fit-content;
         }
 
-        /* Egyedi görgetősáv */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #16181d;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #323642;
-            border-radius: 9999px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #f7ca44;
+        .sidebar-section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin: 12px 0 8px 8px;
+            letter-spacing: 1px;
+            font-weight: 700;
         }
 
-        /* Number input nyilak elrejtése */
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
-        }
-        input[type=number] {
-            -moz-appearance: textfield;
+        .nav-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
 
-        .part-card {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .part-card:hover {
-            transform: translateY(-2px);
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 14px;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            color: var(--text-muted);
+            cursor: pointer;
+            text-align: left;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            width: 100%;
         }
 
-        @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(247, 202, 68, 0.25); }
-            50% { box-shadow: 0 0 16px 2px rgba(247, 202, 68, 0.35); }
+        .nav-item:hover {
+            background-color: var(--bg-card-hover);
+            color: var(--text-main);
         }
-        .craft-ready-glow {
-            animation: pulseGlow 2.8s infinite;
+
+        .nav-item.active {
+            background-color: var(--accent);
+            color: #000;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(247, 202, 68, 0.25);
+        }
+
+        .nav-item svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+
+        .content-area {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+
+        .recipe-header {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 24px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .recipe-icon-large {
+            width: 60px;
+            height: 60px;
+            background: #121418;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border);
+        }
+
+        .recipe-icon-large svg {
+            width: 36px;
+            height: 36px;
+            fill: var(--accent);
+        }
+
+        .recipe-info h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .recipe-meta {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            gap: 16px;
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .item-card {
+            background-color: #121418;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 6px;
+            transition: border-color 0.2s;
+        }
+
+        .item-card:hover {
+            border-color: #383d4e;
+        }
+
+        .item-icon {
+            width: 42px;
+            height: 42px;
+            background: #1a1d24;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2px;
+            border: 1px solid var(--border);
+        }
+
+        .item-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--accent);
+        }
+
+        .item-name {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-main);
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.1;
+        }
+
+        .item-req-count {
+            font-size: 0.75rem;
+            color: var(--accent);
+            background: rgba(247, 202, 68, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .counter-controls {
+            display: flex;
+            align-items: center;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            width: 100%;
+            margin-top: 4px;
+        }
+
+        .counter-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            width: 30px;
+            height: 30px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s;
+        }
+
+        .counter-btn:hover {
+            background: var(--border);
+        }
+
+        .counter-input {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            text-align: center;
+            width: 100%;
+            font-size: 0.88rem;
+            font-weight: 700;
+        }
+
+        .counter-input::-webkit-outer-spin-button,
+        .counter-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .quick-add-bar {
+            display: flex;
+            gap: 4px;
+            width: 100%;
+            margin-top: 2px;
+        }
+
+        .quick-btn {
+            background: #1f232d;
+            border: 1px solid var(--border);
+            color: var(--accent);
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 3px 0;
+            flex: 1;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .quick-btn:hover {
+            background: #2a2f3d;
+        }
+
+        .craftable-summary {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+
+        .craftable-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .craftable-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #121418;
+            padding: 12px 18px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .craftable-info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .craftable-info svg {
+            width: 28px;
+            height: 28px;
+            fill: var(--accent);
+        }
+
+        .craftable-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .craft-action-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .craftable-count {
+            font-size: 0.95rem;
+            color: var(--accent);
+            font-weight: 800;
+        }
+
+        .craft-btn {
+            background-color: var(--accent);
+            color: #000;
+            border: none;
+            font-weight: 700;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .craft-btn:hover:not(:disabled) {
+            background-color: var(--accent-hover);
+        }
+
+        .craft-btn:active:not(:disabled) {
+            transform: scale(0.97);
+        }
+
+        .craft-btn:disabled {
+            background-color: #222630;
+            color: #52596d;
+            cursor: not-allowed;
         }
     </style>
 </head>
-<body class="antialiased selection:bg-see-yellow selection:text-black">
+<body>
 
-    <!-- Felső navigációs sáv (SeeRPG Tools stílus) -->
-    <header class="sticky top-0 z-30 border-b border-see-border/80 bg-[#14161b]/95 backdrop-blur-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-            <!-- Logó -->
-            <div class="flex items-center gap-3">
-                <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-see-yellow/10 border border-see-yellow/30">
-                    <span class="font-extrabold text-sm leading-none tracking-tighter text-see-yellow">See<br><span class="text-white text-[11px]">RPG</span></span>
-                </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <h1 class="font-bold text-base sm:text-lg text-white tracking-tight">Craft Számláló & Leltár</h1>
-                        <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-see-yellow/15 text-see-yellow border border-see-yellow/30">
-                            Fegyverek
-                        </span>
-                    </div>
-                    <p class="text-xs text-see-muted hidden sm:block">Alkatrész nyilvántartó & élő összeszerelés kalkulátor</p>
-                </div>
-            </div>
-
-            <!-- Jobb oldali gyorsműveletek -->
-            <div class="flex items-center gap-2 sm:gap-3">
-                <button onclick="openResetModal()" class="px-3 py-2 rounded-xl bg-see-card hover:bg-red-500/20 text-see-muted hover:text-red-400 border border-see-border hover:border-red-500/40 text-xs sm:text-sm font-medium transition flex items-center gap-1.5">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                    </svg>
-                    <span class="hidden md:inline">Készlet nullázása</span>
-                    <span class="md:hidden">Nullázás</span>
-                </button>
-                <button onclick="scrollToSummary()" class="lg:hidden px-3.5 py-2 rounded-xl bg-see-yellow hover:bg-see-yellowHover text-[#141518] font-bold text-xs sm:text-sm transition flex items-center gap-1.5 shadow-lg shadow-see-yellow/10">
-                    <span>Craftolható:</span>
-                    <span id="mobileTotalCraftBadge" class="px-1.5 py-0.5 rounded-md bg-[#141518] text-see-yellow text-xs font-extrabold">0</span>
-                </button>
-            </div>
+    <header>
+        <div class="logo-area">
+            <span class="logo-badge">SeeRPG</span>
+            <h1>Craft Számláló & Kalkulátor</h1>
         </div>
     </header>
 
-    <!-- Fő tartalom -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <div class="main-container">
+        <!-- Bal oldali menü -->
+        <div class="sidebar">
+            <div class="sidebar-section-title">Fegyverek</div>
+            <div class="nav-list" id="nav-weapons"></div>
 
-            <!-- BAL OSZLOP: Szobák választó (Sidebar) -->
-            <aside class="lg:col-span-3 bg-see-panel border border-see-border rounded-2xl p-3.5 shadow-xl">
-                <div class="flex items-center gap-2 px-2.5 py-2 mb-2 text-see-yellow font-semibold text-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                    </svg>
-                    <span>Fegyver szobák</span>
-                </div>
-
-                <!-- Szoba gombok konténer -->
-                <nav id="roomNav" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-1 gap-2">
-                    <!-- JS tölti fel -->
-                </nav>
-
-                <!-- Közös Eszköz (Kalapács) gyorspanel -->
-                <div class="mt-4 pt-4 border-t border-see-border/80">
-                    <div class="px-2 mb-2 flex items-center justify-between">
-                        <span class="text-xs font-semibold uppercase tracking-wider text-see-muted">Szükséges eszköz</span>
-                        <span class="text-[11px] text-see-yellow/90 bg-see-yellow/10 px-2 py-0.5 rounded-full">Nem fogy el</span>
-                    </div>
-                    <div id="hammerBox" class="bg-see-card border border-see-border rounded-xl p-3 flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-2.5 min-w-0">
-                            <div class="w-10 h-10 rounded-lg bg-[#1b1d23] border border-see-border flex items-center justify-center shrink-0" id="hammerIconSlot"></div>
-                            <div class="truncate">
-                                <div class="text-sm font-semibold text-white truncate">Kalapács</div>
-                                <div class="text-[11px] text-see-muted" id="hammerStatusText">Hiányzik (min. 1 db)</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-1 shrink-0">
-                            <button onclick="updatePartCount('hammer', -1)" class="w-8 h-8 rounded-lg bg-[#1b1d23] hover:bg-see-border text-white font-bold flex items-center justify-center transition active:scale-95">-</button>
-                            <input type="number" min="0" max="999" id="hammerInput" onchange="setPartCount('hammer', this.value)" class="w-10 h-8 text-center bg-[#14161b] border border-see-border rounded-lg text-sm font-bold text-see-yellow focus:outline-none focus:border-see-yellow">
-                            <button onclick="updatePartCount('hammer', 1)" class="w-8 h-8 rounded-lg bg-see-yellow hover:bg-see-yellowHover text-[#141518] font-bold flex items-center justify-center transition active:scale-95">+</button>
-                        </div>
-                    </div>
-                </div>
-            </aside>
-
-            <!-- KÖZÉPSŐ OSZLOP: Aktív Fegyver Szoba & Alkatrészek -->
-            <section class="lg:col-span-5 bg-see-panel border border-see-border rounded-2xl p-5 shadow-xl">
-                <!-- Fegyver fejléc -->
-                <div class="flex flex-wrap items-start justify-between gap-4 pb-4 border-b border-see-border/80">
-                    <div class="flex items-center gap-3.5">
-                        <div id="activeWeaponIcon" class="w-14 h-14 rounded-2xl bg-see-card border border-see-border flex items-center justify-center p-2 shadow-inner"></div>
-                        <div>
-                            <h2 id="activeWeaponTitle" class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Lefűrészelt csövű</h2>
-                            <div id="activeWeaponMeta" class="flex flex-wrap items-center gap-3 text-xs text-see-muted mt-1">
-                                <!-- Súly, slot, idő -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Szoba gyorsgombok -->
-                    <div class="flex items-center gap-1.5">
-                        <button onclick="addOneSetToRoom()" title="Minden alkatrészhez +1 db hozzáadása ebben a szobában" class="px-3 py-1.5 rounded-xl bg-see-card hover:bg-see-cardHover border border-see-border hover:border-see-yellow/50 text-xs font-semibold text-see-yellow transition flex items-center gap-1">
-                            <span>+1 teljes szett</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- SeeRPG stílusú címkék -->
-                <div class="flex flex-wrap items-center gap-2 mt-3.5 mb-5">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-see-yellowDim text-see-yellow border border-see-yellow/25">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
-                        Csoport jogosultsághoz kötött
-                    </span>
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-see-blueDim text-see-blueText border border-sky-400/25">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        Blueprintet igényel
-                    </span>
-                </div>
-
-                <!-- Alapanyagok lista -->
-                <div class="mb-2 flex items-center justify-between">
-                    <h3 class="text-sm font-bold text-white">A recepthez szükséges alapanyagok:</h3>
-                    <span class="text-xs text-see-muted">Készlet / Szükséges (1 db-hoz)</span>
-                </div>
-
-                <div id="partsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
-                    <!-- JS generálja az alkatrész kártyákat -->
-                </div>
-
-                <!-- Eszköz emlékeztető a szobán belül -->
-                <div class="pt-3 border-t border-see-border/80">
-                    <h3 class="text-sm font-bold text-white mb-2.5">A recepthez szükséges eszközök:</h3>
-                    <div id="roomHammerReminder" class="rounded-xl p-3 border flex items-center justify-between">
-                        <!-- JS frissíti -->
-                    </div>
-                </div>
-            </section>
-
-            <!-- JOBB OSZLOP: Élő Craftolható Fegyverek Összesítő -->
-            <section id="summarySection" class="lg:col-span-4 bg-see-panel border border-see-border rounded-2xl p-5 shadow-xl lg:sticky lg:top-20">
-                <div class="flex items-center justify-between gap-2 pb-4 border-b border-see-border/80">
-                    <div>
-                        <h2 class="text-lg font-extrabold text-white flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-see-yellow inline-block"></span>
-                            Craftolható fegyverek
-                        </h2>
-                        <p class="text-xs text-see-muted mt-0.5">Az összes beírt alkatrészed alapján</p>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-[11px] uppercase tracking-wider text-see-muted block">Összesen</span>
-                        <span id="totalCraftableCount" class="text-xl font-extrabold text-see-yellow">0 db</span>
-                    </div>
-                </div>
-
-                <!-- Kalapács figyelmeztető sáv, ha 0 van -->
-                <div id="noHammerAlert" class="hidden mt-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-2.5">
-                    <svg class="w-5 h-5 text-see-yellow shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                    </svg>
-                    <div class="text-xs text-amber-200/90 leading-relaxed">
-                        <strong class="text-see-yellow">Nincs Kalapácsod beállítva!</strong> Az összeszereléshez legalább 1 db Kalapács szükséges (a bal oldali sávban tudod hozzáadni).
-                    </div>
-                </div>
-
-                <!-- Fegyver eredmény kártyák -->
-                <div id="craftSummaryList" class="mt-4 space-y-3">
-                    <!-- JS generálja -->
-                </div>
-            </section>
-
+            <div class="sidebar-section-title" style="margin-top: 16px;">Drogok & Egyéb</div>
+            <div class="nav-list" id="nav-drugs"></div>
         </div>
-    </main>
 
-    <!-- Toast értesítés -->
-    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+        <!-- Jobb oldali tartalom -->
+        <div class="content-area">
+            <div class="card" id="recipe-view"></div>
 
-    <!-- Egyedi megerősítő ablak (alert/confirm helyett) -->
-    <div id="resetModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
-        <div class="bg-see-panel border border-see-border rounded-2xl max-w-md w-full p-6 shadow-2xl">
-            <div class="flex items-center gap-3 text-red-400 mb-3">
-                <div class="w-10 h-10 rounded-xl bg-red-500/15 border border-red-500/30 flex items-center justify-center">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                </div>
-                <h3 class="text-lg font-bold text-white">Készlet nullázása</h3>
-            </div>
-            <p class="text-sm text-see-muted mb-6">Biztosan törölni szeretnéd az összes beírt fegyveralkatrész mennyiséget (0-ra állítva mindent)?</p>
-            <div class="flex items-center justify-end gap-2.5">
-                <button onclick="closeResetModal()" class="px-4 py-2 rounded-xl bg-see-card hover:bg-see-cardHover text-white text-sm font-medium border border-see-border transition">Mégse</button>
-                <button onclick="confirmResetAll()" class="px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-bold transition">Igen, nullázás</button>
+            <!-- Craftolható összesítő -->
+            <div class="craftable-summary">
+                <div class="section-title">Craftolható tárgyak</div>
+                <div class="craftable-list" id="craftable-list"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // =========================================================================
-        // 1. EGYEDI JÁTÉKSZERVER STÍLUSÚ SVG IKONOK (A képek alapján)
-        // =========================================================================
-        const ICONS = {
-            // Eszköz: Kalapács
-            hammer: `<svg viewBox="0 0 64 64" class="w-full h-full">
-                <path d="M14 48 L36 26 L40 30 L18 52 C16.5 53.5 14.5 53.5 13.5 52 C12.5 51 12.5 49.5 14 48 Z" fill="#9a5b32" stroke="#5c3317" stroke-width="1.5"/>
-                <path d="M31 19 L43 13 L51 21 L47 26 L42 22 L38 26 L42 30 L38 34 L28 24 Z" fill="#8b949e" stroke="#484f58" stroke-width="1.5" stroke-linejoin="round"/>
-                <path d="M43 13 L51 21 L48 24 L40 16 Z" fill="#c9d1d9"/>
-            </svg>`,
-
-            // Fő fegyver ikonok
-            weapon_sawedoff: `<svg viewBox="0 0 80 40" class="w-full h-full">
-                <path d="M10 26 C14 23 20 21 26 21 L32 21 L32 16 L72 16 L72 20 L34 20 L34 24 L25 25 C21 28 15 32 10 31 Z" fill="#8b5a2b" stroke="#3e2723" stroke-width="1.2"/>
-                <rect x="30" y="15" width="42" height="4" rx="1" fill="#9ca3af" stroke="#374151" stroke-width="1"/>
-                <rect x="36" y="19" width="24" height="3" rx="1" fill="#6b7280"/>
-                <rect x="40" y="20" width="12" height="3.5" rx="1" fill="#78350f"/>
-            </svg>`,
-
-            weapon_minismg: `<svg viewBox="0 0 80 44" class="w-full h-full">
-                <rect x="24" y="14" width="28" height="9" rx="2" fill="#4b5563" stroke="#1f2937" stroke-width="1.2"/>
-                <rect x="52" y="16" width="12" height="3.5" rx="1" fill="#374151"/>
-                <rect x="14" y="16" width="10" height="2.5" fill="#6b7280"/>
-                <path d="M26 23 L23 34 L29 34 L32 23 Z" fill="#374151" stroke="#111827" stroke-width="1"/>
-                <path d="M39 23 L41 37 L46 37 L44 23 Z" fill="#1f2937" stroke="#111827" stroke-width="1"/>
-            </svg>`,
-
-            weapon_ak47: `<svg viewBox="0 0 96 40" class="w-full h-full">
-                <path d="M8 23 L24 19 L24 25 L9 29 Z" fill="#92400e" stroke="#451a03" stroke-width="1"/>
-                <rect x="24" y="17" width="28" height="6" rx="1" fill="#4b5563" stroke="#1f2937" stroke-width="1"/>
-                <rect x="52" y="17.5" width="14" height="5" rx="1" fill="#92400e"/>
-                <rect x="66" y="18.5" width="22" height="2.5" fill="#6b7280"/>
-                <path d="M30 23 L27 32 L32 32 L34 23 Z" fill="#78350f"/>
-                <path d="M43 23 C44 29 47 33 50 35 L54 33 C51 30 49 26 48 23 Z" fill="#374151" stroke="#111827" stroke-width="1"/>
-            </svg>`,
-
-            weapon_pistol: `<svg viewBox="0 0 64 44" class="w-full h-full">
-                <rect x="18" y="12" width="32" height="7" rx="1.5" fill="#9ca3af" stroke="#374151" stroke-width="1.2"/>
-                <rect x="20" y="19" width="26" height="3" fill="#6b7280"/>
-                <path d="M19 22 L15 35 L23 35 L26 22 Z" fill="#4b5563" stroke="#1f2937" stroke-width="1.2"/>
-                <path d="M27 22 C27 26 32 26 32 22" fill="none" stroke="#6b7280" stroke-width="1.5"/>
-            </svg>`,
-
-            // --- LEFŰRÉSZELT CSÖVŰ ALKATRÉSZEK ---
-            sawed_body: `<svg viewBox="0 0 64 44" class="w-full h-full">
-                <path d="M14 25 C18 21 24 20 30 20 L48 20 L48 26 L31 26 C26 29 20 33 14 31 Z" fill="#9a6b43" stroke="#4a3018" stroke-width="1.3"/>
-                <rect x="30" y="17" width="20" height="5" rx="1" fill="#9ca3af" stroke="#374151" stroke-width="1.2"/>
-                <path d="M28 26 C28 30 33 30 33 26" fill="none" stroke="#4b5563" stroke-width="1.5"/>
-            </svg>`,
-            sawed_barrel: `<svg viewBox="0 0 64 44" class="w-full h-full">
-                <g transform="rotate(35 32 22)">
-                    <rect x="10" y="18" width="44" height="5" rx="1.5" fill="#b0b7c3" stroke="#374151" stroke-width="1.2"/>
-                    <line x1="14" y1="20" x2="50" y2="20" stroke="#e5e7eb" stroke-width="1"/>
-                    <circle cx="18" cy="20.5" r="1" fill="#374151"/>
-                    <circle cx="46" cy="20.5" r="1" fill="#374151"/>
-                </g>
-            </svg>`,
-            sawed_magtube: `<svg viewBox="0 0 64 44" class="w-full h-full">
-                <g transform="rotate(35 32 22)">
-                    <rect x="14" y="18.5" width="38" height="5" rx="1" fill="#9ca3af" stroke="#374151" stroke-width="1.2"/>
-                    <rect x="10" y="18" width="5" height="6" rx="1" fill="#facc15" stroke="#854d0e" stroke-width="1"/>
-                    <rect x="48" y="17.5" width="5" height="7" rx="1" fill="#4b5563"/>
-                </g>
-            </svg>`,
-            sawed_forend: `<svg viewBox="0 0 64 44" class="w-full h-full">
-                <rect x="16" y="16" width="32" height="12" rx="3" fill="#7c4a27" stroke="#3e220f" stroke-width="1.4"/>
-                <line x1="22" y1="18" x2="22" y2="26" stroke="#4a2810" stroke-width="1.5"/>
-                <line x1="27" y1="18" x2="27" y2="26" stroke="#4a2810" stroke-width="1.5"/>
-                <line x1="32" y1="18" x2="32" y2="26" stroke="#4a2810" stroke-width="1.5"/>
-                <line x1="37" y1="18" x2="37" y2="26" stroke="#4a2810" stroke-width="1.5"/>
-                <line x1="42" y1="18" x2="42" y2="26" stroke="#4a2810" stroke-width="1.5"/>
-            </svg>`,
-            sawed_grip: `<svg viewBox="0 0 64 44" class="w-full h-full">
-                <path d="M27 11 L39 11 L35 33 L23 33 Z" fill="#6b7280" stroke="#1f2937" stroke-width="1.3"/>
-                <path d="M29 14 L36 14 L33 30 L26 30 Z" fill="#854d0e"/>
-                <circle cx="31" cy="22" r="1.5" fill="#d1d5db"/>
-            </svg>`,
-
-            // --- MINI SMG ALKATRÉSZEK ---
-            smg_lower: `<svg viewBox="0 0 64 44" class="w-full h-full">
-                <g transform="rotate(-25 32 22)">
-                    <rect x="14" y="18" width="36" height="6" rx="1.5" fill="#6b7280" stroke="#1f2937" stroke-width="1.2"/>
-                    <path d="M28 24 C28 29 35 29 35 24" fill="none" stroke="#4b5563" stroke-width="1.8"/>
-                    <rect x="38" y="24" width="7" height="3" fill="#374151"/>
-                </g>
-            </svg>`,
-            smg_upper: `<svg viewBox="0 0 64 44" class="w-full h-full">
-                <g transform="rotate(-35 32 22)">
-                    <rect x="16" y="17" width="30" height="8" rx="1.5" fill="#78716c" stroke="#292524" stroke-width="1.2"/>
-                    <rect x="46" y="19" width="8" height="4" rx="0.5" fill="#44403c"/>
-                    <rect x="12" y="19" width="4" height="3" fill="#a8a29e"/>
-                </g>
-            </svg>`,
-            smg_stock: `<svg viewBox="0 0 64 44" class="w-full h-full">
-                <path d="M20 12 L24 12 L27 26 L44 26 L44 30 L23 30 Z" fill="none" stroke="#9ca3af" stroke-width="2.5" stroke-linejoin="round"/>
-                <path d="M24 12 L28 12 L30 23 L44 23" fill="none" stroke="#6b7280" stroke-width="1.8"/>
-            </svg>`,
-            smg_grip: `<svg viewBox="0 0 64 44" class="w-full h-full">
-                <path d="M26 11 L39 13 L36 33 L24 31 Z" fill="#4b5563" stroke="#111827" stroke-width="1.3"/>
-                <rect x="28" y="15" width="7" height="14" rx="1" fill="#374151"/>
-            </svg>`,
-            smg_mag: `<svg viewBox="0 0 64 44" class="w-full h-full">
-                <rect x="26" y="10" width="12" height="24" rx="1.5" fill="#4b5563" stroke="#1f2937" stroke-width="1.3"/>
-                <rect x="27" y="10" width="10" height="3" fill="#facc15"/>
-                <line x1="30" y1="15" x2="30" y2="31" stroke="#6b7280" stroke-width="1.2"/>
-                <line x1="34" y1="15" x2="34" y2="31" stroke="#6b7280" stroke-width="1.2"/>
-            </svg>`,
-
-            // --- ASSAULT RIFLE (AK-47) ALKATRÉSZEK ---
-            ak_receiver: `<svg viewBox="0 0 64 44" class="w-full h-full">
-                <g transform="rotate(-18 32 22)">
-                    <rect x="14" y="18" width="34" height="7" rx="1" fill="#6b7280" stroke="#1f2937" stroke-width="1.2"/>
-                    <rect x="48" y="19" width="8" height="3" fill="#9ca3af"/>
-                    <path d="M26 25 C26 29 32 29 32 25" fill="none" stroke="#4b5563" stroke-width="1.5"/>
-                </g>
-            </svg>`,
-            ak_bolt: `<svg viewBox="0 0 64 44" class="w-full h-full">
-                <g transform="rotate(-25 32 22)">
-                    <rect x="14" y="16" width="36" height="3" rx="1" fill="#d1d5db" stroke="#4b5563" stroke-width="1"/>
-                    <rect x="18" y="23" width="30" height="3.5" rx="1" fill="#9ca3af" stroke="#374151" stroke-width="1"/>
-                    <rect x="24" y="19" width="5" height="4" fill="#6b7280"/>
-                </g>
-            </svg>`,
-            ak_dustcover: `<svg viewBox="0 0 64 44" class="w-full h-full">
-                <g transform="rotate(28 32 22)">
-                    <path d="M14 19 C14 16 50 16 50 19 L50 25 L14 25 Z" fill="#4b5563" stroke="#1f2937" stroke-width="1.2"/>
-                    <line x1="20" y1="20" x2="44" y2="20" stroke="#9ca3af" stroke-width="1"/>
-                </g>
-            </svg>`,
-            ak_stock: `<svg viewBox="0 0 64 44" class="w-full h-full">
-                <g transform="rotate(-15 32 22)">
-                    <path d="M14 17 L46 15 L46 27 L14 29 Z" fill="none" stroke="#b45309" stroke-width="3" stroke-linejoin="round"/>
-                    <line x1="28" y1="16" x2="28" y2="28" stroke="#92400e" stroke-width="2.5"/>
-                </g>
-            </svg>`,
-            ak_handguard: `<svg viewBox="0 0 64 44" class="w-full h-full">
-                <rect x="16" y="15" width="32" height="6" rx="1.5" fill="#92400e" stroke="#451a03" stroke-width="1.2"/>
-                <rect x="14" y="22" width="36" height="7" rx="2" fill="#b45309" stroke="#451a03" stroke-width="1.2"/>
-                <line x1="24" y1="24" x2="38" y2="24" stroke="#78350f" stroke-width="1.5"/>
-            </svg>`,
-            ak_grip: `<svg viewBox="0 0 64 44" class="w-full h-full">
-                <path d="M26 11 L38 11 L36 33 L24 33 Z" fill="#92400e" stroke="#451a03" stroke-width="1.3"/>
-                <line x1="28" y1="15" x2="35" y2="15" stroke="#78350f" stroke-width="1.2"/>
-                <line x1="27" y1="20" x2="35" y2="20" stroke="#78350f" stroke-width="1.2"/>
-                <line x1="27" y1="25" x2="34" y2="25" stroke="#78350f" stroke-width="1.2"/>
-            </svg>`,
-            ak_mag: `<svg viewBox="0 0 64 44" class="w-full h-full">
-                <path d="M24 10 L35 10 C36 19 39 27 43 33 L32 35 C28 28 25 19 24 10 Z" fill="#4b5563" stroke="#1f2937" stroke-width="1.3"/>
-                <path d="M28 13 C29 20 31 27 35 32" fill="none" stroke="#9ca3af" stroke-width="1.2"/>
-                <path d="M32 13 C33 20 35 27 39 32" fill="none" stroke="#9ca3af" stroke-width="1.2"/>
-            </svg>`,
-
-            // --- PISTOL ALKATRÉSZEK ---
-            pistol_frame: `<svg viewBox="0 0 64 44" class="w-full h-full">
-                <rect x="20" y="14" width="28" height="4" rx="1" fill="#9ca3af" stroke="#374151" stroke-width="1.1"/>
-                <path d="M21 18 L17 33 L25 33 L28 18 Z" fill="#6b7280" stroke="#1f2937" stroke-width="1.2"/>
-                <path d="M29 18 C29 23 34 23 34 18" fill="none" stroke="#9ca3af" stroke-width="1.5"/>
-            </svg>`,
-            pistol_barrel: `<svg viewBox="0 0 64 44" class="w-full h-full">
-                <g transform="rotate(38 32 22)">
-                    <rect x="14" y="19" width="36" height="5" rx="1.5" fill="#d1d5db" stroke="#4b5563" stroke-width="1.2"/>
-                    <rect x="16" y="18" width="10" height="7" rx="1" fill="#9ca3af" stroke="#4b5563" stroke-width="1"/>
-                </g>
-            </svg>`,
-            pistol_slide: `<svg viewBox="0 0 64 44" class="w-full h-full">
-                <g transform="rotate(-35 32 22)">
-                    <rect x="14" y="17" width="36" height="7" rx="1.5" fill="#b0b7c3" stroke="#374151" stroke-width="1.2"/>
-                    <rect x="16" y="15" width="3" height="2" fill="#374151"/>
-                    <rect x="45" y="15" width="2.5" height="2" fill="#374151"/>
-                    <line x1="20" y1="19" x2="20" y2="22" stroke="#4b5563" stroke-width="1.2"/>
-                    <line x1="23" y1="19" x2="23" y2="22" stroke="#4b5563" stroke-width="1.2"/>
-                </g>
-            </svg>`,
-            pistol_grip: `<svg viewBox="0 0 64 44" class="w-full h-full">
-                <path d="M26 12 L38 12 L35 32 L23 32 Z" fill="#374151" stroke="#111827" stroke-width="1.3"/>
-                <rect x="27" y="15" width="7" height="14" rx="1" fill="#4b5563"/>
-                <circle cx="30.5" cy="18" r="1.2" fill="#9ca3af"/>
-                <circle cx="30.5" cy="26" r="1.2" fill="#9ca3af"/>
-            </svg>`,
-            pistol_mag: `<svg viewBox="0 0 64 44" class="w-full h-full">
-                <g transform="rotate(28 32 22)">
-                    <rect x="27" y="9" width="10" height="25" rx="1" fill="#d1d5db" stroke="#4b5563" stroke-width="1.2"/>
-                    <rect x="25" y="33" width="14" height="3" rx="1" fill="#374151"/>
-                    <circle cx="32" cy="15" r="1.2" fill="#4b5563"/>
-                    <circle cx="32" cy="21" r="1.2" fill="#4b5563"/>
-                    <circle cx="32" cy="27" r="1.2" fill="#4b5563"/>
-                </g>
-            </svg>`
+        const icons = {
+            weapon: '<svg viewBox="0 0 24 24"><path d="M2,10V14H6V10H2M7,9H11V15H7V9M12,11H22V13H12V11Z"/></svg>',
+            drug: '<svg viewBox="0 0 24 24"><path d="M6,2H18V4H6V2M6,20H18V22H6V20M7,6H17V18H7V6Z"/></svg>',
+            hammer: '<svg viewBox="0 0 24 24"><path d="M21,3.5L19.5,2L14,7.5L10.5,4L9,5.5L12.5,9L4,17.5V20H6.5L15,11.5L18.5,15L20,13.5L16.5,10L21,3.5Z"/></svg>',
+            part: '<svg viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4Z"/></svg>',
+            leaf: '<svg viewBox="0 0 24 24"><path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8.15,20C13.5,20 18,15.5 18,10.15C18,9.43 17.56,8.68 17,8Z"/></svg>',
+            flask: '<svg viewBox="0 0 24 24"><path d="M6,22L9,15H5L8,8H16L19,15H15L18,22H6Z"/></svg>',
+            tray: '<svg viewBox="0 0 24 24"><path d="M4,6H20V18H4V6M2,4V20H22V4H2Z"/></svg>'
         };
 
-        // =========================================================================
-        // 2. FEGYVER RECEPTEK ÉS SZOBÁK ADATBÁZISA (Pontos SeeRPG nevek)
-        // =========================================================================
-        const RECIPES = [
-            {
-                id: 'sawedoff',
-                roomName: 'Lefűrészelt csövű',
-                fullName: 'Lefűrészelt csövű',
-                weight: '2.38 kg',
-                slots: '1x3 slot',
-                time: '30s',
-                icon: ICONS.weapon_sawedoff,
-                parts: [
-                    { id: 'sawed_body', name: 'Lefűrészelt csövű test', required: 1, icon: ICONS.sawed_body },
-                    { id: 'sawed_barrel', name: 'Lefűrészelt csövű cső', required: 1, icon: ICONS.sawed_barrel },
-                    { id: 'sawed_magtube', name: 'Lefűrészelt csövű csőtár', required: 1, icon: ICONS.sawed_magtube },
-                    { id: 'sawed_forend', name: 'Lefűrészelt csövű előágy', required: 1, icon: ICONS.sawed_forend },
-                    { id: 'sawed_grip', name: 'Lefűrészelt csövű pisztolymarkolat', required: 1, icon: ICONS.sawed_grip }
-                ]
+        const recipes = {
+            'ak47': {
+                name: 'Assault Rifle', group: 'weapons', weight: '3.2 kg', slots: '1x3 slot', time: '30s', icon: icons.weapon,
+                materials: [
+                    { id: 'ak_tok', name: 'Assault Rifle tok', count: 1 },
+                    { id: 'ak_rarszerkezet', name: 'Assault Rifle zárszerkezet', count: 1 },
+                    { id: 'ak_tokfedel', name: 'Assault Rifle tokfedél', count: 1 },
+                    { id: 'ak_valtamasz', name: 'Assault Rifle válltámasz', count: 1 },
+                    { id: 'ak_elogy', name: 'Assault Rifle előgy', count: 1 },
+                    { id: 'ak_pisztolymarkolat', name: 'Assault Rifle pisztolymarkolat', count: 1 },
+                    { id: 'ak_tor', name: 'Assault Rifle tár', count: 1 }
+                ],
+                tools: [{ id: 'kalapocs', name: 'Kalapács', count: 1 }]
             },
-            {
-                id: 'minismg',
-                roomName: 'Mini SMG',
-                fullName: 'Mini SMG',
-                weight: '1.5 kg',
-                slots: '1x2 slot',
-                time: '30s',
-                icon: ICONS.weapon_minismg,
-                parts: [
-                    { id: 'smg_lower', name: 'Mini SMG test (alsó)', required: 1, icon: ICONS.smg_lower },
-                    { id: 'smg_upper', name: 'Mini SMG test (felső)', required: 1, icon: ICONS.smg_upper },
-                    { id: 'smg_stock', name: 'Mini SMG válltámasz', required: 1, icon: ICONS.smg_stock },
-                    { id: 'smg_grip', name: 'Mini SMG pisztolymarkolat', required: 1, icon: ICONS.smg_grip },
-                    { id: 'smg_mag', name: 'Mini SMG tár', required: 1, icon: ICONS.smg_mag }
-                ]
+            'pistol': {
+                name: 'Pistol', group: 'weapons', weight: '0.96 kg', slots: '1x2 slot', time: '30s', icon: icons.weapon,
+                materials: [
+                    { id: 'pistol_test', name: 'Pistol test', count: 1 },
+                    { id: 'pistol_csd', name: 'Pistol cső', count: 1 },
+                    { id: 'pistol_szan', name: 'Pistol szán', count: 1 },
+                    { id: 'pistol_markolat', name: 'Pistol markolat', count: 1 },
+                    { id: 'pistol_tor', name: 'Pistol tár', count: 1 }
+                ],
+                tools: [{ id: 'kalapocs', name: 'Kalapács', count: 1 }]
             },
-            {
-                id: 'ak47',
-                roomName: 'AK-47',
-                fullName: 'Assault Rifle (AK-47)',
-                weight: '3.2 kg',
-                slots: '1x3 slot',
-                time: '30s',
-                icon: ICONS.weapon_ak47,
-                parts: [
-                    { id: 'ak_receiver', name: 'Assault Rifle tok', required: 1, icon: ICONS.ak_receiver },
-                    { id: 'ak_bolt', name: 'Assault Rifle zárszerkezet', required: 1, icon: ICONS.ak_bolt },
-                    { id: 'ak_dustcover', name: 'Assault Rifle tokfedél', required: 1, icon: ICONS.ak_dustcover },
-                    { id: 'ak_stock', name: 'Assault Rifle válltámasz', required: 1, icon: ICONS.ak_stock },
-                    { id: 'ak_handguard', name: 'Assault Rifle előágy', required: 1, icon: ICONS.ak_handguard },
-                    { id: 'ak_grip', name: 'Assault Rifle pisztolymarkolat', required: 1, icon: ICONS.ak_grip },
-                    { id: 'ak_mag', name: 'Assault Rifle tár', required: 1, icon: ICONS.ak_mag }
-                ]
+            'minismg': {
+                name: 'Mini SMG', group: 'weapons', weight: '1.5 kg', slots: '1x2 slot', time: '30s', icon: icons.weapon,
+                materials: [
+                    { id: 'minismg_test_felso', name: 'Mini SMG test (felső)', count: 1 },
+                    { id: 'minismg_test_also', name: 'Mini SMG test (alsó)', count: 1 },
+                    { id: 'minismg_valtamasz', name: 'Mini SMG válltámasz', count: 1 },
+                    { id: 'minismg_pisztolymarkolat', name: 'Mini SMG pisztolymarkolat', count: 1 },
+                    { id: 'minismg_tor', name: 'Mini SMG tár', count: 1 }
+                ],
+                tools: [{ id: 'kalapocs', name: 'Kalapács', count: 1 }]
             },
-            {
-                id: 'pistol',
-                roomName: 'Pistol',
-                fullName: 'Pistol',
-                weight: '0.96 kg',
-                slots: '1x2 slot',
-                time: '30s',
-                icon: ICONS.weapon_pistol,
-                parts: [
-                    { id: 'pistol_frame', name: 'Pistol test', required: 1, icon: ICONS.pistol_frame },
-                    { id: 'pistol_barrel', name: 'Pistol cső', required: 1, icon: ICONS.pistol_barrel },
-                    { id: 'pistol_slide', name: 'Pistol szán', required: 1, icon: ICONS.pistol_slide },
-                    { id: 'pistol_grip', name: 'Pistol markolat', required: 1, icon: ICONS.pistol_grip },
-                    { id: 'pistol_mag', name: 'Pistol tár', required: 1, icon: ICONS.pistol_mag }
-                ]
+            'lefureszelt': {
+                name: 'Lefűrészelt csövű', group: 'weapons', weight: '2.38 kg', slots: '1x3 slot', time: '30s', icon: icons.weapon,
+                materials: [
+                    { id: 'lefureszelt_test', name: 'Lefűrészelt csövű test', count: 1 },
+                    { id: 'lefureszelt_cso', name: 'Lefűrészelt csövű cső', count: 1 },
+                    { id: 'lefureszelt_csotar', name: 'Lefűrészelt csövű csőtár', count: 1 },
+                    { id: 'lefureszelt_elogy', name: 'Lefűrészelt csövű előgy', count: 1 },
+                    { id: 'lefureszelt_markolat', name: 'Pistol markolat', count: 1 }
+                ],
+                tools: [{ id: 'kalapocs', name: 'Kalapács', count: 1 }]
+            },
+            'kokain': {
+                name: 'Kokain (50g)', group: 'drugs', weight: '50 g', slots: '1x1 slot', time: '30s', icon: icons.drug,
+                materials: [
+                    { id: 'kokacserje', name: 'Kokacserje levél', count: 300, quickAdd: 300 },
+                    { id: 'hidrogen_peroxid', name: 'Hidrogén-Peroxid', count: 1 },
+                    { id: 'sebbenzin', name: 'Sebbenzin', count: 1 },
+                    { id: 'ures_zacsko', name: 'Üres zacskó (M)', count: 1 }
+                ],
+                tools: [{ id: 'lombik', name: 'Lombik', count: 1 }, { id: 'talca', name: 'Tálca', count: 1 }]
+            },
+            'marihuana': {
+                name: 'Marihuána (50g)', group: 'drugs', weight: '50 g', slots: '1x1 slot', time: '30s', icon: icons.drug,
+                materials: [
+                    { id: 'kannabisz_bibe', name: 'Kannabisz bibe', count: 180, quickAdd: 180 },
+                    { id: 'ures_zacsko', name: 'Üres zacskó (M)', count: 1 }
+                ],
+                tools: [{ id: 'uv_lampa', name: 'UV lámpa', count: 1 }, { id: 'talca', name: 'Tálca', count: 1 }]
+            },
+            'meth': {
+                name: 'Meth (50g)', group: 'drugs', weight: '50 g', slots: '1x1 slot', time: '30s', icon: icons.drug,
+                materials: [
+                    { id: 'pszeudoefedrin', name: 'Pszeudoefedrin', count: 20, quickAdd: 20 },
+                    { id: 'hidrogen_peroxid', name: 'Hidrogén-Peroxid', count: 1 },
+                    { id: 'aceton', name: 'Aceton', count: 1 },
+                    { id: 'ures_zacsko', name: 'Üres zacskó (M)', count: 1 }
+                ],
+                tools: [{ id: 'lombik', name: 'Lombik', count: 1 }, { id: 'talca', name: 'Tálca', count: 1 }]
+            },
+            'c4': {
+                name: 'C4 robbanótöltet', group: 'weapons', weight: '0.75 kg', slots: '1x2 slot', time: '10s', icon: icons.weapon,
+                materials: [
+                    { id: 'c4_robbanonyag', name: 'C4 robbanóanyag', count: 1 },
+                    { id: 'mikrokontroller', name: 'Mikrokontroller', count: 1 }
+                ],
+                tools: [{ id: 'szigeteloszalag', name: 'Szigetelőszalag', count: 1 }, { id: 'csavarhuzo', name: 'Csavarhúzó', count: 1 }]
             }
-        ];
+        };
 
-        // =========================================================================
-        // 3. ÁLLAPOTKEZELÉS (State & LocalStorage)
-        // =========================================================================
-        const STORAGE_KEY = 'seerpg_weapon_inventory_v1';
-        let activeRoomId = 'sawedoff';
-        let inventory = loadInventory();
-
-        function getDefaultInventory() {
-            const data = { hammer: 1 }; // Alapértelmezetten 1 kalapácsot adunk, hogy kényelmes legyen
-            RECIPES.forEach(recipe => {
-                recipe.parts.forEach(part => {
-                    data[part.id] = 0;
-                });
-            });
-            return data;
-        }
-
-        function loadInventory() {
-            try {
-                const saved = localStorage.getItem(STORAGE_KEY);
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    return { ...getDefaultInventory(), ...parsed };
-                }
-            } catch (e) {
-                console.error('Nem sikerült betölteni a mentett készletet:', e);
-            }
-            return getDefaultInventory();
-        }
+        let inventory = JSON.parse(localStorage.getItem('seerpg_inventory_all')) || {};
+        let activeRecipeId = 'ak47';
 
         function saveInventory() {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(inventory));
-            } catch (e) {
-                console.error('Nem sikerült menteni a készletet:', e);
-            }
+            localStorage.setItem('seerpg_inventory_all', JSON.stringify(inventory));
+            renderRecipe();
+            renderCraftableList();
         }
 
-        // =========================================================================
-        // 4. KALKULÁCIÓS LOGIKA
-        // =========================================================================
-        function calculateRecipeStatus(recipe) {
-            const hasHammer = (inventory.hammer || 0) >= 1;
-            let minPartsCraftable = Infinity;
-            let ownedPartTypes = 0;
-            const missingParts = [];
+        function getItemCount(id) { return inventory[id] || 0; }
+        function setItemCount(id, val) { inventory[id] = Math.max(0, parseInt(val) || 0); saveInventory(); }
+        function changeCount(id, amount) { inventory[id] = Math.max(0, getItemCount(id) + amount); saveInventory(); }
 
-            recipe.parts.forEach(part => {
-                const owned = inventory[part.id] || 0;
-                const possibleFromThisPart = Math.floor(owned / part.required);
-                if (possibleFromThisPart < minPartsCraftable) {
-                    minPartsCraftable = possibleFromThisPart;
-                }
-                if (owned >= part.required) {
-                    ownedPartTypes++;
-                } else {
-                    missingParts.push({
-                        name: part.name,
-                        missingCount: part.required - owned
-                    });
-                }
+        function craftItem(recipeId) {
+            const recipe = recipes[recipeId];
+            let canCraft = true;
+            [...recipe.materials, ...recipe.tools].forEach(item => { if (getItemCount(item.id) < item.count) canCraft = false; });
+            if (!canCraft) return;
+            recipe.materials.forEach(item => { inventory[item.id] = Math.max(0, getItemCount(item.id) - item.count); });
+            saveInventory();
+        }
+
+        function renderNav() {
+            const navWeapons = document.getElementById('nav-weapons');
+            const navDrugs = document.getElementById('nav-drugs');
+            navWeapons.innerHTML = ''; navDrugs.innerHTML = '';
+
+            Object.keys(recipes).forEach(key => {
+                const rec = recipes[key];
+                const btn = document.createElement('button');
+                btn.className = `nav-item ${key === activeRecipeId ? 'active' : ''}`;
+                btn.innerHTML = `${rec.icon} <span>${rec.name}</span>`;
+                btn.onclick = () => { activeRecipeId = key; renderNav(); renderRecipe(); };
+                if (rec.group === 'weapons') navWeapons.appendChild(btn);
+                else navDrugs.appendChild(btn);
             });
-
-            if (minPartsCraftable === Infinity) minPartsCraftable = 0;
-
-            return {
-                partsReadyCount: minPartsCraftable,
-                craftableCount: hasHammer ? minPartsCraftable : 0,
-                hasHammer,
-                ownedPartTypes,
-                totalPartTypes: recipe.parts.length,
-                missingParts
-            };
         }
 
-        // =========================================================================
-        // 5. KÉSZLET MÓDOSÍTÓ FÜGGVÉNYEK
-        // =========================================================================
-        function updatePartCount(partId, delta) {
-            const current = inventory[partId] || 0;
-            const next = Math.max(0, Math.min(9999, current + delta));
-            inventory[partId] = next;
-            saveInventory();
-            renderAll();
-        }
-
-        function setPartCount(partId, rawValue) {
-            let val = parseInt(rawValue, 10);
-            if (isNaN(val) || val < 0) val = 0;
-            if (val > 9999) val = 9999;
-            inventory[partId] = val;
-            saveInventory();
-            renderAll();
-        }
-
-        function switchRoom(roomId) {
-            activeRoomId = roomId;
-            renderAll();
-        }
-
-        function addOneSetToRoom() {
-            const recipe = RECIPES.find(r => r.id === activeRoomId);
-            if (!recipe) return;
-            recipe.parts.forEach(part => {
-                inventory[part.id] = (inventory[part.id] || 0) + part.required;
-            });
-            saveInventory();
-            renderAll();
-            showToast(`+1 szett (${recipe.roomName}) hozzáadva a készlethez!`, 'success');
-        }
-
-        function craftOneWeapon(recipeId) {
-            const recipe = RECIPES.find(r => r.id === recipeId);
-            if (!recipe) return;
-            const status = calculateRecipeStatus(recipe);
-            if (status.craftableCount < 1) return;
-
-            // Alapanyagok levonása (a Kalapács megmarad!)
-            recipe.parts.forEach(part => {
-                inventory[part.id] = Math.max(0, (inventory[part.id] || 0) - part.required);
-            });
-
-            saveInventory();
-            renderAll();
-            showToast(`1 db ${recipe.roomName} lecraftolva! Alkatrészek levonva.`, 'craft');
-        }
-
-        // =========================================================================
-        // 6. MEGJELENÍTÉS (Renderelés)
-        // =========================================================================
-        function renderAll() {
-            renderRoomNavigation();
-            renderHammerBox();
-            renderActiveRoom();
-            renderCraftSummary();
-        }
-
-        function renderRoomNavigation() {
-            const nav = document.getElementById('roomNav');
-            nav.innerHTML = RECIPES.map(recipe => {
-                const isActive = recipe.id === activeRoomId;
-                const status = calculateRecipeStatus(recipe);
-                const canCraft = status.craftableCount > 0;
-
-                return `
-                    <button onclick="switchRoom('${recipe.id}')"
-                        class="w-full text-left px-3.5 py-3 rounded-xl font-bold text-sm transition flex items-center justify-between gap-2 border ${
-                            isActive 
-                            ? 'bg-see-yellow text-[#141518] border-see-yellow shadow-lg shadow-see-yellow/15' 
-                            : 'bg-see-card/70 hover:bg-see-card text-gray-200 border-transparent hover:border-see-border'
-                        }">
-                        <div class="flex items-center gap-2.5 min-w-0">
-                            <div class="w-8 h-6 shrink-0 flex items-center justify-center ${isActive ? 'brightness-90 contrast-125' : ''}">
-                                ${recipe.icon}
-                            </div>
-                            <span class="truncate">${recipe.roomName}</span>
+        function renderRecipe() {
+            const rec = recipes[activeRecipeId];
+            const container = document.getElementById('recipe-view');
+            let html = `
+                <div class="recipe-header">
+                    <div class="recipe-icon-large">${rec.icon}</div>
+                    <div class="recipe-info">
+                        <h2>${rec.name}</h2>
+                        <div class="recipe-meta">
+                            <span>⚖️ ${rec.weight}</span><span>📦 ${rec.slots}</span><span>⏱️ ${rec.time}</span>
                         </div>
-                        ${canCraft ? `
-                            <span class="px-2 py-0.5 rounded-full text-xs font-extrabold shrink-0 ${
-                                isActive 
-                                ? 'bg-[#141518] text-see-yellow' 
-                                : 'bg-see-yellow text-[#141518]'
-                            }">
-                                ${status.craftableCount} db
-                            </span>
-                        ` : `
-                            <span class="text-[11px] font-medium shrink-0 ${isActive ? 'text-[#141518]/75' : 'text-see-muted'}">
-                                ${status.ownedPartTypes}/${status.totalPartTypes}
-                            </span>
-                        `}
-                    </button>
-                `;
-            }).join('');
-        }
-
-        function renderHammerBox() {
-            const count = inventory.hammer || 0;
-            const hasHammer = count >= 1;
-            document.getElementById('hammerIconSlot').innerHTML = ICONS.hammer;
-            document.getElementById('hammerInput').value = count;
-            
-            const box = document.getElementById('hammerBox');
-            const statusText = document.getElementById('hammerStatusText');
-            
-            if (hasHammer) {
-                box.classList.remove('border-red-500/50');
-                box.classList.add('border-see-yellow/50');
-                statusText.textContent = 'Rendelkezésre áll ✓';
-                statusText.className = 'text-[11px] text-emerald-400 font-medium';
-            } else {
-                box.classList.remove('border-see-yellow/50');
-                box.classList.add('border-red-500/50');
-                statusText.textContent = 'Hiányzik (min. 1 db)';
-                statusText.className = 'text-[11px] text-red-400 font-medium';
-            }
-        }
-
-        function renderActiveRoom() {
-            const recipe = RECIPES.find(r => r.id === activeRoomId) || RECIPES[0];
-
-            // Fejléc adatok
-            document.getElementById('activeWeaponIcon').innerHTML = recipe.icon;
-            document.getElementById('activeWeaponTitle').textContent = recipe.fullName;
-            document.getElementById('activeWeaponMeta').innerHTML = `
-                <span class="inline-flex items-center gap-1">
-                    <svg class="w-3.5 h-3.5 text-see-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/></svg>
-                    ${recipe.weight}
-                </span>
-                <span class="inline-flex items-center gap-1">
-                    <svg class="w-3.5 h-3.5 text-see-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-                    ${recipe.slots}
-                </span>
-                <span class="inline-flex items-center gap-1">
-                    <svg class="w-3.5 h-3.5 text-see-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    ${recipe.time}
-                </span>
-            `;
-
-            // Alkatrész kártyák
-            const partsGrid = document.getElementById('partsGrid');
-            partsGrid.innerHTML = recipe.parts.map(part => {
-                const count = inventory[part.id] || 0;
-                const hasEnough = count >= part.required;
-
-                return `
-                    <div class="part-card bg-see-card rounded-2xl p-3.5 border flex flex-col justify-between ${
-                        hasEnough 
-                        ? 'border-see-yellow/60 shadow-md shadow-see-yellow/5' 
-                        : 'border-see-border hover:border-gray-600'
-                    }">
-                        <!-- Felső sor: Ikon + Név -->
-                        <div class="flex flex-col items-center text-center mb-3">
-                            <div class="w-16 h-12 mb-2 flex items-center justify-center">
-                                ${part.icon}
-                            </div>
-                            <div class="text-xs font-semibold text-gray-100 leading-snug line-clamp-2 min-h-[2rem] flex items-center justify-center">
-                                ${part.name}
-                            </div>
-                            <div class="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold ${
-                                hasEnough 
-                                ? 'bg-see-yellow/15 text-see-yellow' 
-                                : 'bg-[#1b1d23] text-see-muted'
-                            }">
-                                <span>Szükséges: ${part.required} db</span>
-                            </div>
-                        </div>
-
-                        <!-- Alsó sor: - / input / + vezérlők -->
-                        <div class="flex items-center justify-between gap-1.5 pt-2.5 border-t border-see-border/70">
-                            <button onclick="updatePartCount('${part.id}', -1)" 
-                                class="w-9 h-9 rounded-xl bg-[#1b1d23] hover:bg-red-500/20 hover:text-red-400 text-white font-extrabold text-base flex items-center justify-center border border-see-border transition active:scale-95">
-                                -
-                            </button>
-
-                            <input type="number" min="0" max="9999" value="${count}" 
-                                onchange="setPartCount('${part.id}', this.value)"
-                                aria-label="${part.name} darabszám"
-                                class="w-full h-9 text-center bg-[#14161b] border border-see-border focus:border-see-yellow rounded-xl text-sm font-extrabold ${
-                                    hasEnough ? 'text-see-yellow' : 'text-white'
-                                } focus:outline-none transition">
-
-                            <button onclick="updatePartCount('${part.id}', 1)" 
-                                class="w-9 h-9 rounded-xl bg-see-yellow hover:bg-see-yellowHover text-[#141518] font-extrabold text-base flex items-center justify-center transition active:scale-95 shadow-sm">
-                                +
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            // Eszköz emlékeztető a szoba alján
-            const hasHammer = (inventory.hammer || 0) >= 1;
-            const reminder = document.getElementById('roomHammerReminder');
-            reminder.className = `rounded-xl p-3 border flex items-center justify-between gap-3 ${
-                hasHammer 
-                ? 'bg-see-card/80 border-see-yellow/40' 
-                : 'bg-red-500/10 border-red-500/40'
-            }`;
-            reminder.innerHTML = `
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-lg bg-[#1b1d23] border border-see-border p-1.5 shrink-0">
-                        ${ICONS.hammer}
-                    </div>
-                    <div>
-                        <div class="text-xs font-bold text-white flex items-center gap-2">
-                            <span>Kalapács (1 db)</span>
-                            ${hasHammer 
-                                ? '<span class="text-[11px] text-emerald-400 font-semibold">● Megvan (' + inventory.hammer + ' db)</span>' 
-                                : '<span class="text-[11px] text-red-400 font-semibold">● Hiányzik</span>'
-                            }
-                        </div>
-                        <div class="text-[11px] text-see-muted">Az összeszereléshez szükséges eszköz (nem használódik el).</div>
                     </div>
                 </div>
-                ${!hasHammer ? `
-                    <button onclick="updatePartCount('hammer', 1)" class="px-3 py-1.5 rounded-lg bg-see-yellow hover:bg-see-yellowHover text-[#141518] text-xs font-bold shrink-0 transition">
-                        +1 Kalapács
-                    </button>
-                ` : ''}
+                <div class="section-title">A recepthez szükséges alapanyagok:</div>
+                <div class="items-grid">
             `;
-        }
 
-        function renderCraftSummary() {
-            const listEl = document.getElementById('craftSummaryList');
-            const noHammerAlert = document.getElementById('noHammerAlert');
-            const hasHammer = (inventory.hammer || 0) >= 1;
+            rec.materials.forEach(mat => {
+                const current = getItemCount(mat.id);
+                let quickButtons = mat.quickAdd ? `
+                    <div class="quick-add-bar">
+                        <button class="quick-btn" onclick="changeCount('${mat.id}', ${mat.quickAdd})">+${mat.quickAdd}</button>
+                        <button class="quick-btn" onclick="changeCount('${mat.id}', ${mat.quickAdd * 2})">+${mat.quickAdd * 2}</button>
+                    </div>` : '';
 
-            if (!hasHammer) {
-                noHammerAlert.classList.remove('hidden');
-            } else {
-                noHammerAlert.classList.add('hidden');
-            }
-
-            let totalWeaponsCraftable = 0;
-
-            // Rendezés: amiből lehet craftolni, az kerüljön előre
-            const evaluated = RECIPES.map(recipe => ({
-                recipe,
-                status: calculateRecipeStatus(recipe)
-            })).sort((a, b) => b.status.craftableCount - a.status.craftableCount || b.status.ownedPartTypes - a.status.ownedPartTypes);
-
-            listEl.innerHTML = evaluated.map(({ recipe, status }) => {
-                totalWeaponsCraftable += status.craftableCount;
-                const isReady = status.craftableCount > 0;
-                const partsReadyWithoutHammer = status.partsReadyCount > 0 && !status.hasHammer;
-                const progressPct = Math.round((status.ownedPartTypes / status.totalPartTypes) * 100);
-
-                // Hiányzó alkatrészek szövege
-                let missingText = '';
-                if (status.missingParts.length > 0) {
-                    const names = status.missingParts.slice(0, 3).map(m => m.name.replace(recipe.roomName + ' ', '').replace('Assault Rifle ', ''));
-                    const extra = status.missingParts.length > 3 ? ` +${status.missingParts.length - 3} további` : '';
-                    missingText = `Hiányzik: ${names.join(', ')}${extra}`;
-                } else if (!status.hasHammer) {
-                    missingText = 'Minden alkatrész megvan, csak Kalapács kell!';
-                } else {
-                    missingText = 'Minden alapanyag és eszköz készen áll!';
-                }
-
-                return `
-                    <div class="rounded-2xl p-3.5 border transition-all ${
-                        isReady 
-                        ? 'bg-see-card border-see-yellow craft-ready-glow' 
-                        : 'bg-see-card/60 border-see-border'
-                    }">
-                        <div class="flex items-center justify-between gap-3">
-                            <div class="flex items-center gap-3 min-w-0">
-                                <div class="w-12 h-10 rounded-xl bg-[#1b1d23] border border-see-border p-1.5 flex items-center justify-center shrink-0">
-                                    ${recipe.icon}
-                                </div>
-                                <div class="min-w-0">
-                                    <div class="font-bold text-sm text-white truncate">${recipe.roomName}</div>
-                                    <div class="text-[11px] text-see-muted">${status.ownedPartTypes}/${status.totalPartTypes} alkatrész típus megvan</div>
-                                </div>
-                            </div>
-
-                            <!-- Jelvény -->
-                            <div class="shrink-0">
-                                ${isReady ? `
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-xl bg-see-yellow text-[#141518] font-extrabold text-xs shadow-sm">
-                                        ${status.craftableCount} db kész
-                                    </span>
-                                ` : partsReadyWithoutHammer ? `
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-xs">
-                                        ${status.partsReadyCount} db (Kalapács kell)
-                                    </span>
-                                ` : `
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-xl bg-[#1b1d23] text-see-muted border border-see-border font-semibold text-xs">
-                                        0 db
-                                    </span>
-                                `}
-                            </div>
+                html += `
+                    <div class="item-card">
+                        <div class="item-icon">${mat.id.includes('levél') || mat.id.includes('bibe') ? icons.leaf : icons.part}</div>
+                        <div class="item-name">${mat.name}</div>
+                        <div class="item-req-count">Szükséges: ${mat.count}</div>
+                        <div class="counter-controls">
+                            <button class="counter-btn" onclick="changeCount('${mat.id}', -1)">-</button>
+                            <input type="number" class="counter-input" value="${current}" onchange="setItemCount('${mat.id}', this.value)">
+                            <button class="counter-btn" onclick="changeCount('${mat.id}', 1)">+</button>
                         </div>
+                        ${quickButtons}
+                    </div>
+                `;
+            });
 
-                        <!-- Folyamatjelző csík -->
-                        <div class="w-full h-1.5 bg-[#16181d] rounded-full overflow-hidden mt-3">
-                            <div class="h-full rounded-full transition-all duration-300 ${isReady ? 'bg-see-yellow' : 'bg-gray-500'}" style="width: ${progressPct}%"></div>
-                        </div>
-
-                        <!-- Hiányzó info + Craft gomb -->
-                        <div class="mt-2.5 flex items-center justify-between gap-2">
-                            <p class="text-[11px] ${isReady ? 'text-see-yellow font-medium' : 'text-see-muted'} leading-snug">
-                                ${missingText}
-                            </p>
-                            ${isReady ? `
-                                <button onclick="craftOneWeapon('${recipe.id}')" 
-                                    title="1 db fegyver összeszerelése (levonja a felhasznált alkatrészeket a készletből)"
-                                    class="px-2.5 py-1.5 rounded-lg bg-see-yellow hover:bg-see-yellowHover text-[#141518] font-extrabold text-[11px] shrink-0 transition active:scale-95 flex items-center gap-1">
-                                    <span>Összeszerelés (-1)</span>
-                                </button>
-                            ` : `
-                                <button onclick="switchRoom('${recipe.id}')" class="px-2 py-1 rounded-lg bg-[#1b1d23] hover:bg-see-border text-gray-300 text-[11px] font-medium shrink-0 transition">
-                                    Megnyitás
-                                </button>
-                            `}
+            html += `</div><div class="section-title">A recepthez szükséges eszközök:</div><div class="items-grid">`;
+            rec.tools.forEach(tool => {
+                const current = getItemCount(tool.id);
+                html += `
+                    <div class="item-card">
+                        <div class="item-icon">${tool.id.includes('lombik') ? icons.flask : (tool.id.includes('talca') ? icons.tray : icons.hammer)}</div>
+                        <div class="item-name">${tool.name}</div>
+                        <div class="item-req-count">Szükséges: ${tool.count}</div>
+                        <div class="counter-controls">
+                            <button class="counter-btn" onclick="changeCount('${tool.id}', -1)">-</button>
+                            <input type="number" class="counter-input" value="${current}" onchange="setItemCount('${tool.id}', this.value)">
+                            <button class="counter-btn" onclick="changeCount('${tool.id}', 1)">+</button>
                         </div>
                     </div>
                 `;
-            }).join('');
-
-            document.getElementById('totalCraftableCount').textContent = `${totalWeaponsCraftable} db`;
-            document.getElementById('mobileTotalCraftBadge').textContent = totalWeaponsCraftable;
-        }
-
-        // =========================================================================
-        // 7. SEGÉDFÜGGVÉNYEK (Modal, Toast, Scroll)
-        // =========================================================================
-        function openResetModal() {
-            const modal = document.getElementById('resetModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-
-        function closeResetModal() {
-            const modal = document.getElementById('resetModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }
-
-        function confirmResetAll() {
-            inventory = getDefaultInventory();
-            inventory.hammer = 0;
-            saveInventory();
-            closeResetModal();
-            renderAll();
-            showToast('Az összes alkatrész és eszköz nullázva lett.', 'info');
-        }
-
-        function scrollToSummary() {
-            document.getElementById('summarySection').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            
-            const borderClass = type === 'craft' || type === 'success' 
-                ? 'border-see-yellow text-see-yellow' 
-                : 'border-see-border text-white';
-
-            toast.className = `pointer-events-auto px-4 py-3 rounded-xl bg-[#1b1d23]/95 backdrop-blur-md border ${borderClass} shadow-2xl text-xs sm:text-sm font-semibold flex items-center gap-2.5 transform transition-all duration-300 translate-y-2 opacity-0`;
-            toast.innerHTML = `
-                <span class="w-2 h-2 rounded-full ${type === 'info' ? 'bg-gray-400' : 'bg-see-yellow'}"></span>
-                <span>${message}</span>
-            `;
-
-            container.appendChild(toast);
-            requestAnimationFrame(() => {
-                toast.classList.remove('translate-y-2', 'opacity-0');
             });
 
-            setTimeout(() => {
-                toast.classList.add('translate-y-2', 'opacity-0');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            html += `</div>`;
+            container.innerHTML = html;
+            renderCraftableList();
         }
 
-        // Indítás
-        window.addEventListener('DOMContentLoaded', renderAll);
+        function renderCraftableList() {
+            const listContainer = document.getElementById('craftable-list');
+            let html = '';
+            Object.keys(recipes).forEach(key => {
+                const rec = recipes[key];
+                let maxCraftable = 999;
+                [...rec.materials, ...rec.tools].forEach(item => {
+                    const available = getItemCount(item.id);
+                    const possible = Math.floor(available / item.count);
+                    if (possible < maxCraftable) maxCraftable = possible;
+                });
+                if (maxCraftable === 999) maxCraftable = 0;
+                const canCraft = maxCraftable > 0;
+
+                html += `
+                    <div class="craftable-row">
+                        <div class="craftable-info">
+                            ${rec.icon}
+                            <span class="craftable-name">${rec.name}</span>
+                        </div>
+                        <div class="craft-action-group">
+                            <span class="craftable-count">Elérhető: ${maxCraftable} db</span>
+                            <button class="craft-btn" ${!canCraft ? 'disabled' : ''} onclick="craftItem('${key}')">Összeszerelés (-1)</button>
+                        </div>
+                    </div>
+                `;
+            });
+            listContainer.innerHTML = html;
+        }
+
+        renderNav();
+        renderRecipe();
     </script>
 </body>
 </html>
